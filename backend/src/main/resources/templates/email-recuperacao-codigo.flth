@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro na ShopOnClick</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; color: #343a40;">
+    <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h3 style="color: #007bff; text-align: center;">Olá, ${name}</h3>
+        <p style="text-align: center; font-size: 16px; line-height: 1.5;">
+            ${message}
+        </p>
+    </div>
+</body>
+</html>
