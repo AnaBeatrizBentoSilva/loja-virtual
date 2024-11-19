@@ -30,6 +30,9 @@ public class Person {
     private String name;
     private String cpf;
     private String email;
+    private String passwordRecoveryCode;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date shippingDateCode;
     private String password;
     private String address;
     private String cep;
