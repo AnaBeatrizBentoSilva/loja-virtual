@@ -36,6 +36,8 @@ import TimelineDemo from './pages/TimelineDemo';
 import PrimeReact from 'primereact/api';
 import { Tooltip } from 'primereact/tooltip';
 
+import State from './pages/register/State';
+
 import 'primereact/resources/primereact.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
@@ -160,6 +162,12 @@ const App = () => {
             label: 'Home',
             items: [{
                 label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/'
+            }]
+        },
+        {
+            label: 'Cadastros',
+            items: [{
+                label: 'Estados', icon: 'pi pi-fw pi-home', to: '/states'
             }]
         },
         {
@@ -319,6 +327,7 @@ const App = () => {
                     <Route path="/crud" component={Crud} />
                     <Route path="/empty" component={EmptyPage} />
                     <Route path="/documentation" component={Documentation} />
+                    <Route path="/states" component={State} />
                 </div>
 
                 <AppFooter layoutColorMode={layoutColorMode} />

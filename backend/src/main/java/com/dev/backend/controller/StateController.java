@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.hibernate.mapping.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,21 +27,25 @@ public class StateController {
     private StateService stateService;
 
     @GetMapping("/")
+    @CrossOrigin("http://localhost:3000")
     public List<State> searchAll(){
        return stateService.searchAll();
     }
 
     @PostMapping("/")
+    @CrossOrigin("http://localhost:3000")
     public State insert(@RequestBody State state){
         return stateService.insert(state);
     }
 
     @PutMapping("/")
+    @CrossOrigin("http://localhost:3000")
     public State alter(@RequestBody State state){
         return stateService.alter(state);
     }
 
     @DeleteMapping("/{id}")
+    @CrossOrigin("http://localhost:3000")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         stateService.delete(id);
         return ResponseEntity.ok().build();
