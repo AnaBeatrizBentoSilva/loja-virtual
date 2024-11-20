@@ -4,105 +4,120 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { InputTextarea } from 'primereact/inputtextarea';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { StateService } from '../../service/register/StateService';
 import { Toolbar } from 'primereact/toolbar';
+import { Dropdown } from 'primereact/dropdown';
+import { CityService } from '../../service/register/CityService';
+import { StateService} from '../../service/register/StateService';
 
-const State = () => {
+const City = () => {
 
-    let stateNew = {
+    let cityNew = {
         name: '',
-        acronym: ''
+        state: ''
     };
 
+    const [cities, setCities] = useState(null);
     const [states, setStates] = useState(null);
-    const [stateDialog, setStateDialog] = useState(null);
-    const [stateDeleteDialog, setStateDeleteDialog] = useState(false);
-    const [state, setState] = useState(stateNew);
+    const [cityDialog, setCityDialog] = useState(false);
+    const [cityDeleteDialog, setCityDeleteDialog] = useState(false);
+    const [city, setCity] = useState(cityNew);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
+    const cityService = new CityService();
     const stateService = new StateService();
 
     useEffect(() => {
-        if (states == null){
-            stateService.state().then(res => {
-                setStates(res.data)
+        stateService.state().then((res) => {
+            const formattedStates = res.data.map((state) => ({
+                label: `${state.name} (${state.acronym})`,
+                value: state,
+            }));
+            setStates(formattedStates);
+        });
+    }, [stateService]);
+    
+    
+    useEffect(() => {
+        if (cities == null) {
+            cityService.city().then(res => {
+                setCities(res.data);
             });
         }
-    }, [states, stateService]);
+    }, [cities, cityService]);
+    
 
     const openNew = () => {
-        setState(stateNew);
+        setCity(cityNew);
         setSubmitted(false);
-        setStateDialog(true);
+        setCityDialog(true);
     }
 
     const hideDialog = () => {
         setSubmitted(false);
-        setStateDialog(false);
+        setCityDialog(false);
     }
 
-    const hideDeleteStateDialog = () => {
-        setStateDeleteDialog(false);
+    const hideDeleteCityDialog = () => {
+        setCityDeleteDialog(false);
     }
 
-    const saveState = () => {
+    const saveCity = () => {
         setSubmitted(true);
 
-        if(state.name.trim()){
-            let _state = { ...state};
-            if(state.id){
-                stateService.alter(_state).then(data => {
+        if(city.name.trim()){
+            let _city = { ...city};
+            if(city.id){
+                cityService.alter(_city).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
-                    setStates(null);
+                    setCities(null);
                     });
             }else{
-                stateService.insert(_state).then(data => {
+                cityService.insert(_city).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Created', life: 3000 })
-                    setStates(null)
+                    setCities(null)
                 });
             }
-            setStateDialog(false);
-            setState(stateNew);
+            setCityDialog(false);
+            setCity(cityNew);
         }
     }
 
-    const editState = (state) => {
-        setState({ ...state});
-        setStateDialog(true);
+    const editCity = (city) => {
+        setCity({ ...city});
+        setCityDialog(true);
     }
 
-    const confirmDeleteState = (state) => {
-        setState(state);
-        setStateDeleteDialog(true);
+    const confirmDeleteCity = (city) => {
+        setCity(city);
+        setCityDeleteDialog(true);
     }
 
-    const deleteState = () => {
-        stateService.delete(state.id).then(data => {
+    const deleteCity = () => {
+        cityService.delete(city.id).then(data => {
             toast.current.show({severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000});
 
-            setStates(null);
-            setStateDeleteDialog(false);
+            setCities(null);
+            setCityDeleteDialog(false);
         });
     }
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
-        let _state = { ...state};
-        _state[`${name}`] = val;
+        let _city = { ...city};
+        _city[`${name}`] = val;
 
-        setState(_state);
+        setCity(_city);
     }
 
     const leftToolbarTemplate = () => {
         return(
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Novo Estado" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
+                    <Button label="Nova Cidade" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         );
@@ -126,11 +141,11 @@ const State = () => {
         );
     }
 
-    const acronymBodyTemplate = (rowData) => {
+    const stateBodyTemplate = (rowData) => {
         return(
             <>
-                <span className='p-column-title'>Sigla</span>
-                {rowData.acronym}
+                <span className='p-column-title'>Estado</span>
+                {rowData.state && (rowData.state.name+'/'+rowData.state.acronym)}
             </>
         );
     }
@@ -138,15 +153,15 @@ const State = () => {
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editState(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mt-2" onClick={() => confirmDeleteState(rowData)} />
+                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editCity(rowData)} />
+                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mt-2" onClick={() => confirmDeleteCity(rowData)} />
             </div>
         );
     }
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className='m-0'>Estados Cadastrados</h5>
+            <h5 className='m-0'>Cidades Cadastradas</h5>
             <span className='block mt-2 md:mt-0 p-input-icon-left'>
                 <i className='pi pi-search'/>
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
@@ -154,16 +169,16 @@ const State = () => {
         </div>
     );
 
-    const stateDialogFooter = (
+    const cityDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveState} />
+            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveCity} />
         </>
     );
-    const deleteStateDialogFooter = (
+    const deleteCityDialogFooter = (
         <>
-            <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteStateDialog} />
-            <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteState} />
+            <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteCityDialog} />
+            <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteCity} />
         </>
     );
 
@@ -174,7 +189,7 @@ const State = () => {
                     <Toast ref={toast} />
                     <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
 
-                    <DataTable ref={dt} value={states}
+                    <DataTable ref={dt} value={cities}
                         dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]} className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
@@ -182,26 +197,27 @@ const State = () => {
                         <Column selectionMode="multiple" headerStyle={{ width: '3rem'}}></Column>
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="name" header="Nome" sortable body={nameBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
-                        <Column field="acronym" header="Sigla" body={acronymBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="state" header="Estado" sortable body={stateBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column body={actionBodyTemplate}></Column>
                     </DataTable>
 
-                    <Dialog visible={stateDialog} style={{ width: '450px' }} header="Detalhes do Estado" modal className="p-fluid" footer={stateDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={cityDialog} style={{ width: '450px' }} header="Detalhes da Cidade" modal className="p-fluid" footer={cityDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={state.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !state.name })} />
-                            {submitted && !state.name && <small className="p-invalid">Nome é obrigatório.</small>}
+                            <InputText id="name" value={city.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !city.name })} />
+                            {submitted && !city.name && <small className="p-invalid">Nome é obrigatório.</small>}
                         </div>
+
                         <div className="field">
-                            <label htmlFor="acronym">Sigla</label>
-                            <InputTextarea id="acronym" value={state.description} onChange={(e) => onInputChange(e, 'acronym')} required rows={3} cols={20} />
+                            <label htmlFor="name">Estado</label>
+                            <Dropdown value={city.state} filter onChange={(e) => setCity({ ...city, state: e.value })} options={states} placeholder="Selecione o Estado" />
                         </div>
                     </Dialog>
 
-                    <Dialog visible={stateDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteStateDialogFooter} onHide={hideDeleteStateDialog}>
+                    <Dialog visible={cityDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteCityDialogFooter} onHide={hideDeleteCityDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {state && <span>Deseja excluir o Estado de <b>{state.name}</b>?</span>}
+                            {city && <span>Deseja excluir a Cidade de <b>{city.name}</b>?</span>}
                         </div>
                     </Dialog>
 
@@ -215,4 +231,4 @@ const comparisonFn = function (prevProps, nextProps){
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(State, comparisonFn);
+export default React.memo(City, comparisonFn);
