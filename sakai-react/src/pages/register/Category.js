@@ -6,101 +6,101 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { MarkService } from '../../service/register/MarkService';
+import { CategoryService } from '../../service/register/CategoryService';
 import { Toolbar } from 'primereact/toolbar';
 
-const Mark = () => {
+const Category = () => {
 
-    let markNew = {
+    let categoryNew = {
         name: ''
     };
 
-    const [marks, setMarks] = useState(null);
-    const [markDialog, setMarkDialog] = useState(null);
-    const [markDeleteDialog, setMarkDeleteDialog] = useState(false);
-    const [mark, setMark] = useState(markNew);
+    const [categories, setCategories] = useState(null);
+    const [categoryDialog, setCategoryDialog] = useState(null);
+    const [categoryDeleteDialog, setCategoryDeleteDialog] = useState(false);
+    const [category, setCategory] = useState(categoryNew);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const markService = new MarkService();
+    const categoryService = new CategoryService();
 
     useEffect(() => {
-        if (marks == null){
-            markService.mark().then(res => {
-                setMarks(res.data)
+        if (categories == null){
+            categoryService.category().then(res => {
+                setCategories(res.data)
             });
         }
-    }, [marks, markService]);
+    }, [categories, categoryService]);
 
     const openNew = () => {
-        setMark(markNew);
+        setCategory(categoryNew);
         setSubmitted(false);
-        setMarkDialog(true);
+        setCategoryDialog(true);
     }
 
     const hideDialog = () => {
         setSubmitted(false);
-        setMarkDialog(false);
+        setCategoryDialog(false);
     }
 
-    const hideDeleteMarkDialog = () => {
-        setMarkDeleteDialog(false);
+    const hideDeleteCategoryDialog = () => {
+        setCategoryDeleteDialog(false);
     }
 
-    const saveMark = () => {
+    const saveCategory = () => {
         setSubmitted(true);
 
-        if(mark.name.trim()){
-            let _mark = { ...mark};
-            if(mark.id){
-                markService.alter(_mark).then(data => {
+        if(category.name.trim()){
+            let _category = { ...category};
+            if(category.id){
+                categoryService.alter(_category).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
-                    setMarks(null);
+                    setCategories(null);
                     });
             }else{
-                markService.insert(_mark).then(data => {
+                categoryService.insert(_category).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Created', life: 3000 })
-                    setMarks(null)
+                    setCategories(null)
                 });
             }
-            setMarkDialog(false);
-            setMark(markNew);
+            setCategoryDialog(false);
+            setCategory(categoryNew);
         }
     }
 
-    const editMark = (mark) => {
-        setMark({ ...mark});
-        setMarkDialog(true);
+    const editCategory = (category) => {
+        setCategory({ ...category});
+        setCategoryDialog(true);
     }
 
-    const confirmDeleteMark = (mark) => {
-        setMark(mark);
-        setMarkDeleteDialog(true);
+    const confirmDeleteCategory = (category) => {
+        setCategory(category);
+        setCategoryDeleteDialog(true);
     }
 
-    const deleteMark = () => {
-        markService.delete(mark.id).then(data => {
+    const deleteCategory = () => {
+        categoryService.delete(category.id).then(data => {
             toast.current.show({severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000});
 
-            setMarks(null);
-            setMarkDeleteDialog(false);
+            setCategories(null);
+            setCategoryDeleteDialog(false);
         });
     }
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
-        let _mark = { ...mark};
-        _mark[`${name}`] = val;
+        let _category = { ...category};
+        _category[`${name}`] = val;
 
-        setMark(_mark);
+        setCategory(_category);
     }
 
     const leftToolbarTemplate = () => {
         return(
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Nova Marca" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
+                    <Button label="Nova Categoria" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         );
@@ -127,15 +127,15 @@ const Mark = () => {
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editMark(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mt-2" onClick={() => confirmDeleteMark(rowData)} />
+                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editCategory(rowData)} />
+                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mt-2" onClick={() => confirmDeleteCategory(rowData)} />
             </div>
         );
     }
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className='m-0'>Marcas Cadastradas</h5>
+            <h5 className='m-0'>Categorias Cadastradas</h5>
             <span className='block mt-2 md:mt-0 p-input-icon-left'>
                 <i className='pi pi-search'/>
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
@@ -143,16 +143,16 @@ const Mark = () => {
         </div>
     );
 
-    const markDialogFooter = (
+    const categoryDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveMark} />
+            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveCategory} />
         </>
     );
-    const deleteMarkDialogFooter = (
+    const deleteCategoryDialogFooter = (
         <>
-            <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteMarkDialog} />
-            <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteMark} />
+            <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteCategoryDialog} />
+            <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteCategory} />
         </>
     );
 
@@ -163,7 +163,7 @@ const Mark = () => {
                     <Toast ref={toast} />
                     <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
 
-                    <DataTable ref={dt} value={marks}
+                    <DataTable ref={dt} value={categories}
                         dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]} className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
@@ -174,18 +174,18 @@ const Mark = () => {
                         <Column body={actionBodyTemplate}></Column>
                     </DataTable>
 
-                    <Dialog visible={markDialog} style={{ width: '450px' }} header="Detalhes da Marca" modal className="p-fluid" footer={markDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={categoryDialog} style={{ width: '450px' }} header="Detalhes da Categoria" modal className="p-fluid" footer={categoryDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={mark.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !mark.name })} />
-                            {submitted && !mark.name && <small className="p-invalid">Nome é obrigatório.</small>}
+                            <InputText id="name" value={category.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !category.name })} />
+                            {submitted && !category.name && <small className="p-invalid">Nome é obrigatório.</small>}
                         </div>
                     </Dialog>
 
-                    <Dialog visible={markDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteMarkDialogFooter} onHide={hideDeleteMarkDialog}>
+                    <Dialog visible={categoryDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteCategoryDialogFooter} onHide={hideDeleteCategoryDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {mark && <span>Deseja excluir a Marca <b>{mark.name}</b>?</span>}
+                            {category && <span>Deseja excluir a Categoria <b>{category.name}</b>?</span>}
                         </div>
                     </Dialog>
 
@@ -199,4 +199,4 @@ const comparisonFn = function (prevProps, nextProps){
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Mark, comparisonFn);
+export default React.memo(Category, comparisonFn);

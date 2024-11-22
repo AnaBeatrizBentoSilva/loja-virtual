@@ -39,6 +39,7 @@ import { Tooltip } from 'primereact/tooltip';
 import State from './pages/register/State';
 import City from './pages/register/City';
 import Mark from './pages/register/Mark';
+import Category from './pages/register/Category'
 
 import 'primereact/resources/primereact.css';
 import 'primeicons/primeicons.css';
@@ -171,7 +172,8 @@ const App = () => {
             items: [
                 {label: 'Estados', icon: 'pi pi-fw pi-home', to: '/states'},
                 {label: 'Cidades', icon: 'pi pi-fw pi-home', to: '/cities'},
-                {label: 'Marcas', icon: 'pi pi-fw pi-home', to: '/marks'}
+                {label: 'Marcas', icon: 'pi pi-fw pi-home', to: '/marks'},
+                {label: 'Categorias', icon: 'pi pi-fw pi-home', to: '/categories'}
             ]
         },
         {
@@ -334,6 +336,7 @@ const App = () => {
                     <Route path="/states" component={State} />
                     <Route path="/cities" component={City} />
                     <Route path="/marks" component={Mark} />
+                    <Route path="/categories" component={Category} />
                 </div>
 
                 <AppFooter layoutColorMode={layoutColorMode} />
