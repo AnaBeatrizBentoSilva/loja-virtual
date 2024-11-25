@@ -8,6 +8,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
 import { ProductService } from '../../service/register/ProductService';
 import { CategoryService } from '../../service/register/CategoryService';
 import { MarkService } from '../../service/register/MarkService';
@@ -270,14 +271,13 @@ const Product = () => {
     
                         <div className="field">
                             <label htmlFor="costValue">Valor de Custo</label>
-                            <InputText id="costValue" value={product.costValue} onChange={(e) => onInputChange(e, 'costValue')} required className={classNames({ 'p-invalid': submitted && !product.costValue })} />
+                            <InputNumber id="costValue" value={product.costValue} mode="currency" currency="BRL" locale="pt-BR" onValueChange={(e) => onInputChange(e, 'costValue')} required className={classNames({ 'p-invalid': submitted && !product.costValue })} />
                             {submitted && !product.costValue && <small className="p-invalid">Valor de custo é obrigatório.</small>}
                         </div>
     
                         <div className="field">
                             <label htmlFor="saleValue">Valor de Venda</label>
-                            <InputText id="saleValue" value={product.saleValue} onChange={(e) => onInputChange(e, 'saleValue')} required className={classNames({ 'p-invalid': submitted && !product.saleValue })} />
-                            {submitted && !product.saleValue && <small className="p-invalid">Valor de venda é obrigatório.</small>}
+                            <InputNumber id="saleValue" value={product.saleValue} mode="currency" currency="BRL" locale="pt-BR" onValueChange={(e) => onInputChange(e, 'saleValue')} required className={classNames({ 'p-invalid': submitted && !product.saleValue })} />                            {submitted && !product.saleValue && <small className="p-invalid">Valor de venda é obrigatório.</small>}
                         </div>
     
                         <div className="field">
