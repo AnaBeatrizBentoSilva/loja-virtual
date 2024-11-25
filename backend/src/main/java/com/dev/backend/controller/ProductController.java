@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,21 +25,25 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping("/")
+    @CrossOrigin("http://localhost:3000")
     public List<Product> searchAll(){
         return productService.searchAll();
     }
 
     @PostMapping("/")
+    @CrossOrigin("http://localhost:3000")
     public Product insert(@RequestBody Product product){
         return productService.insert(product);
     }
 
     @PutMapping("/")
+    @CrossOrigin("http://localhost:3000")
     public Product alter(@RequestBody Product product){
         return productService.alter(product);
     }
 
     @DeleteMapping("/{id}")
+    @CrossOrigin("http://localhost:3000")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         productService.delete(id);
         return ResponseEntity.ok().build();
