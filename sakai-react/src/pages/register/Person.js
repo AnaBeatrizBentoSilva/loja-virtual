@@ -8,6 +8,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
+import { InputMask } from 'primereact/inputmask';
 import { PersonService } from '../../service/register/PersonService';
 import { CityService } from '../../service/register/CityService';
 
@@ -252,7 +253,7 @@ const Person = () => {
     
                         <div className="field">
                             <label htmlFor="cpf">CPF</label>
-                            <InputText id="cpf" value={person.cpf} onChange={(e) => onInputChange(e, 'cpf')} className={classNames({ 'p-invalid': submitted && !person.cpf })} />
+                            <InputMask id="cpf" value={person.cpf} mask="999.999.999-99" onChange={(e) => onInputChange(e, 'cpf')} className={classNames({ 'p-invalid': submitted && !person.cpf })} />
                             {submitted && !person.cpf && <small className="p-invalid">CPF é obrigatório.</small>}
                         </div>
     
@@ -264,8 +265,7 @@ const Person = () => {
     
                         <div className="field">
                             <label htmlFor="cep">CEP</label>
-                            <InputText id="cep" value={person.cep} onChange={(e) => onInputChange(e, 'cep')} required className={classNames({ 'p-invalid': submitted && !person.cep })} />
-                            {submitted && !person.cep && <small className="p-invalid">CEP é obrigatório.</small>}
+                            <InputMask id="cep" value={person.cep} mask="99999-999" onChange={(e) => onInputChange(e, 'cep')} required className={classNames({ 'p-invalid': submitted && !person.cep })} />                            {submitted && !person.cep && <small className="p-invalid">CEP é obrigatório.</small>}
                         </div>
 
                         <div className="field">
