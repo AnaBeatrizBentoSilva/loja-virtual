@@ -40,7 +40,8 @@ import State from './pages/register/State';
 import City from './pages/register/City';
 import Mark from './pages/register/Mark';
 import Category from './pages/register/Category';
-import Product from './pages/register/Product'
+import Product from './pages/register/Product';
+import Permission from './pages/register/Permission'
 
 import 'primereact/resources/primereact.css';
 import 'primeicons/primeicons.css';
@@ -175,7 +176,8 @@ const App = () => {
                 {label: 'Cidades', icon: 'pi pi-fw pi-home', to: '/cities'},
                 {label: 'Marcas', icon: 'pi pi-fw pi-home', to: '/marks'},
                 {label: 'Categorias', icon: 'pi pi-fw pi-home', to: '/categories'},
-                {label: 'Produtos', icon: 'pi pi-fw pi-home', to: '/products'}
+                {label: 'Produtos', icon: 'pi pi-fw pi-home', to: '/products'},
+                {label: 'Permissões', icon: 'pi pi-fw pi-home', to: '/permissions'}
             ]
         },
         {
@@ -340,6 +342,7 @@ const App = () => {
                     <Route path="/marks" component={Mark} />
                     <Route path="/categories" component={Category} />
                     <Route path="/products" component={Product} />
+                    <Route path="/permissions" component={Permission} />
                 </div>
 
                 <AppFooter layoutColorMode={layoutColorMode} />
