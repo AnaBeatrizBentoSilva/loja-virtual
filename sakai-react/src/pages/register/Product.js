@@ -9,6 +9,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
+import {useFormik} from 'formik';
 import { ProductService } from '../../service/register/ProductService';
 import { CategoryService } from '../../service/register/CategoryService';
 import { MarkService } from '../../service/register/MarkService';
@@ -20,8 +21,8 @@ const Product = () => {
         detailedDescription: '',
         costValue: '',
         saleValue: '',
-        category: '',
-        mark: ''
+        category: null,
+        mark: null
     };
 
     const [products, setProducts] = useState(null);
@@ -37,6 +38,34 @@ const Product = () => {
     const productService = new ProductService();
     const categoryService = new CategoryService();
     const markService = new MarkService();
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: product,
+
+        validate: (data) => {
+            let errors = {};
+        
+            if (!data.shortDescription) {
+                errors.shortDescription = "Descrição curta é obrigatória.";
+            }
+        
+            if (!data.costValue) {
+                errors.costValue = "Valor de custo é obrigatório.";
+            } 
+
+            if (!data.saleValue) {
+                errors.saleValue = "Valor de venda é obrigatório.";
+            } 
+        
+            return errors;
+        },
+        onSubmit: (data) => {
+            setProduct(data);
+            saveProduct();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
         categoryService.category().then((res) => {
@@ -85,7 +114,7 @@ const Product = () => {
         setSubmitted(true);
 
         if(product.shortDescription.trim()){
-            let _product = { ...product};
+            let _product = formik.values;
             if(product.id){
                 productService.alter(_product).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -120,12 +149,9 @@ const Product = () => {
         });
     }
 
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _product = { ...product};
-        _product[`${name}`] = val;
-
-        setProduct(_product);
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     }
 
     const leftToolbarTemplate = () => {
@@ -223,7 +249,7 @@ const Product = () => {
     const productDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveProduct} />
+            <Button type="submit" form="formProduct" label="Salvar" icon="pi pi-check" className="p-button-text" />
         </>
     );
 
@@ -258,37 +284,40 @@ const Product = () => {
                     </DataTable>
     
                     <Dialog visible={productDialog} style={{ width: '450px' }} header="Detalhes do Produto" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="shortDescription">Descrição Curta</label>
-                            <InputText id="shortDescription" value={product.shortDescription} onChange={(e) => onInputChange(e, 'shortDescription')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.shortDescription })} />
-                            {submitted && !product.shortDescription && <small className="p-invalid">Descrição curta é obrigatória.</small>}
-                        </div>
-    
-                        <div className="field">
-                            <label htmlFor="detailedDescription">Descrição Detalhada</label>
-                            <InputText id="detailedDescription" value={product.detailedDescription} onChange={(e) => onInputChange(e, 'detailedDescription')} className={classNames({ 'p-invalid': submitted && !product.detailedDescription })} />
-                        </div>
-    
-                        <div className="field">
-                            <label htmlFor="costValue">Valor de Custo</label>
-                            <InputNumber id="costValue" value={product.costValue} mode="currency" currency="BRL" locale="pt-BR" onValueChange={(e) => onInputChange(e, 'costValue')} required className={classNames({ 'p-invalid': submitted && !product.costValue })} />
-                            {submitted && !product.costValue && <small className="p-invalid">Valor de custo é obrigatório.</small>}
-                        </div>
-    
-                        <div className="field">
-                            <label htmlFor="saleValue">Valor de Venda</label>
-                            <InputNumber id="saleValue" value={product.saleValue} mode="currency" currency="BRL" locale="pt-BR" onValueChange={(e) => onInputChange(e, 'saleValue')} required className={classNames({ 'p-invalid': submitted && !product.saleValue })} />                            {submitted && !product.saleValue && <small className="p-invalid">Valor de venda é obrigatório.</small>}
-                        </div>
-    
-                        <div className="field">
-                            <label htmlFor="category">Categoria</label>
-                            <Dropdown value={product.category} filter onChange={(e) => setProduct({ ...product, category: e.value })} options={categories} placeholder="Selecione a Categoria" />
-                        </div>
-    
-                        <div className="field">
-                            <label htmlFor="mark">Marca</label>
-                            <Dropdown value={product.mark} filter onChange={(e) => setProduct({ ...product, mark: e.value })} options={marks} placeholder="Selecione a Marca" />
-                        </div>
+                        <form id="formProduct" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="shortDescription">Descrição Curta*</label>
+                                <InputText id="shortDescription" value={formik.values.shortDescription} onChange={formik.handleChange} onBlur={formik.handleBlur} autoFocus className={classNames({ 'p-invalid': isFormFieldValid('shortDescription') })} />
+                                {getFormErrorMessage('shortDescription')}
+                            </div>
+        
+                            <div className="field">
+                                <label htmlFor="detailedDescription">Descrição Detalhada</label>
+                                <InputText id="detailedDescription" value={formik.values.detailedDescription} onChange={formik.handleChange} />
+                            </div>
+        
+                            <div className="field">
+                                <label htmlFor="costValue">Valor de Custo*</label>
+                                <InputNumber id="costValue" value={formik.values.costValue} mode="currency" currency="BRL" locale="pt-BR" onBlur={formik.handleBlur} onValueChange={formik.handleChange} className={classNames({ 'p-invalid': isFormFieldValid('costValue') })} />
+                                {getFormErrorMessage('costValue')}
+                            </div>
+        
+                            <div className="field">
+                                <label htmlFor="saleValue">Valor de Venda*</label>
+                                <InputNumber id="saleValue" value={formik.values.saleValue} mode="currency" currency="BRL" locale="pt-BR" onBlur={formik.handleBlur} onValueChange={formik.handleChange} className={classNames({ 'p-invalid': isFormFieldValid('saleValue') })} />                            
+                                {getFormErrorMessage('saleValue')}
+                            </div>
+        
+                            <div className="field">
+                                <label htmlFor="category">Categoria</label>
+                                <Dropdown id="category" value={formik.values.category} filter onChange={formik.handleChange} options={categories} placeholder="Selecione a Categoria" />
+                            </div>
+        
+                            <div className="field">
+                                <label htmlFor="mark">Marca</label>
+                                <Dropdown id="mark" value={formik.values.mark} filter onChange={formik.handleChange} options={marks} placeholder="Selecione a Marca" />
+                            </div>
+                        </form>
                     </Dialog>
     
                     <Dialog visible={productDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>

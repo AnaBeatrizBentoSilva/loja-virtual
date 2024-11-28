@@ -7,8 +7,9 @@ import { Button } from 'primereact/button';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { StateService } from '../../service/register/StateService';
 import { Toolbar } from 'primereact/toolbar';
+import {useFormik} from 'formik';
+import { StateService } from '../../service/register/StateService';
 
 const State = () => {
 
@@ -26,6 +27,30 @@ const State = () => {
     const toast = useRef(null);
     const dt = useRef(null);
     const stateService = new StateService();
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: state,
+
+        validate: (data) => {
+            let errors = {};
+        
+            if (!data.name) {
+                errors.name = "Nome é obrigatório.";
+            }
+        
+            if (!data.acronym) {
+                errors.acronym = "Sigla é obrigatória.";
+            }
+        
+            return errors;
+        },
+        onSubmit: (data) => {
+            setState(data);
+            saveState();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
         if (states == null){
@@ -54,7 +79,7 @@ const State = () => {
         setSubmitted(true);
 
         if(state.name.trim()){
-            let _state = { ...state};
+            let _state = formik.values;
             if(state.id){
                 stateService.alter(_state).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -90,12 +115,9 @@ const State = () => {
         });
     }
 
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _state = { ...state};
-        _state[`${name}`] = val;
-
-        setState(_state);
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     }
 
     const leftToolbarTemplate = () => {
@@ -157,7 +179,7 @@ const State = () => {
     const stateDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveState} />
+            <Button type="submit" form="formState" label="Salvar" icon="pi pi-check" className="p-button-text" />
         </>
     );
     const deleteStateDialogFooter = (
@@ -187,15 +209,18 @@ const State = () => {
                     </DataTable>
 
                     <Dialog visible={stateDialog} style={{ width: '450px' }} header="Detalhes do Estado" modal className="p-fluid" footer={stateDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={state.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !state.name })} />
-                            {submitted && !state.name && <small className="p-invalid">Nome é obrigatório.</small>}
-                        </div>
-                        <div className="field">
-                            <label htmlFor="acronym">Sigla</label>
-                            <InputTextarea id="acronym" value={state.description} onChange={(e) => onInputChange(e, 'acronym')} required rows={3} cols={20} />
-                        </div>
+                        <form id="formState" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="name">Nome</label>
+                                <InputText id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} autoFocus className={classNames({ 'p-invalid': isFormFieldValid('name') })} />
+                                {getFormErrorMessage('name')}
+                            </div>
+                            <div className="field">
+                                <label htmlFor="acronym">Sigla</label>
+                                <InputTextarea id="acronym" value={formik.values.acronym} onChange={formik.handleChange} onBlur={formik.handleBlur} rows={3} cols={20} className={classNames({ 'p-invalid': isFormFieldValid('acronym') })}/>
+                                {getFormErrorMessage('acronym')}
+                            </div>
+                        </form>
                     </Dialog>
 
                     <Dialog visible={stateDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteStateDialogFooter} onHide={hideDeleteStateDialog}>

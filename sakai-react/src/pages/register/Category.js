@@ -6,8 +6,9 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { CategoryService } from '../../service/register/CategoryService';
 import { Toolbar } from 'primereact/toolbar';
+import {useFormik} from 'formik';
+import { CategoryService } from '../../service/register/CategoryService';
 
 const Category = () => {
 
@@ -24,6 +25,26 @@ const Category = () => {
     const toast = useRef(null);
     const dt = useRef(null);
     const categoryService = new CategoryService();
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: category,
+
+        validate: (data) => {
+            let errors = {};
+        
+            if (!data.name) {
+                errors.name = "Nome é obrigatório.";
+            }
+        
+            return errors;
+        },
+        onSubmit: (data) => {
+            setCategory(data);
+            saveCategory();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
         if (categories == null){
@@ -52,7 +73,7 @@ const Category = () => {
         setSubmitted(true);
 
         if(category.name.trim()){
-            let _category = { ...category};
+            let _category = formik.values;
             if(category.id){
                 categoryService.alter(_category).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -88,12 +109,9 @@ const Category = () => {
         });
     }
 
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _category = { ...category};
-        _category[`${name}`] = val;
-
-        setCategory(_category);
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     }
 
     const leftToolbarTemplate = () => {
@@ -146,7 +164,7 @@ const Category = () => {
     const categoryDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveCategory} />
+            <Button type="submit" form="formCategory" label="Salvar" icon="pi pi-check" className="p-button-text" />
         </>
     );
     const deleteCategoryDialogFooter = (
@@ -175,11 +193,13 @@ const Category = () => {
                     </DataTable>
 
                     <Dialog visible={categoryDialog} style={{ width: '450px' }} header="Detalhes da Categoria" modal className="p-fluid" footer={categoryDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={category.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !category.name })} />
-                            {submitted && !category.name && <small className="p-invalid">Nome é obrigatório.</small>}
-                        </div>
+                        <form id="formCategory" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="name">Nome</label>
+                                <InputText id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} autoFocus className={classNames({ 'p-invalid': isFormFieldValid('name') })} />
+                                {getFormErrorMessage('name')}                            
+                            </div>
+                        </form>
                     </Dialog>
 
                     <Dialog visible={categoryDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteCategoryDialogFooter} onHide={hideDeleteCategoryDialog}>
