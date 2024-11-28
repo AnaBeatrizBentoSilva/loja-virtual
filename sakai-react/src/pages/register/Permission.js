@@ -6,8 +6,9 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { PermissionService } from '../../service/register/PermissionService';
 import { Toolbar } from 'primereact/toolbar';
+import {useFormik} from 'formik';
+import { PermissionService } from '../../service/register/PermissionService';
 
 const Permission = () => {
 
@@ -24,6 +25,26 @@ const Permission = () => {
     const toast = useRef(null);
     const dt = useRef(null);
     const permissionService = new PermissionService();
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: permission,
+
+        validate: (data) => {
+            let errors = {};
+        
+            if (!data.name) {
+                errors.name = "Nome é obrigatório.";
+            }
+        
+            return errors;
+        },
+        onSubmit: (data) => {
+            setPermission(data);
+            savePermission();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
         if (permissions == null){
@@ -52,7 +73,7 @@ const Permission = () => {
         setSubmitted(true);
 
         if(permission.name.trim()){
-            let _permission = { ...permission};
+            let _permission = formik.values;
             if(permission.id){
                 permissionService.alter(_permission).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -88,12 +109,9 @@ const Permission = () => {
         });
     }
 
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _permission = { ...permission};
-        _permission[`${name}`] = val;
-
-        setPermission(_permission);
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     }
 
     const leftToolbarTemplate = () => {
@@ -146,7 +164,7 @@ const Permission = () => {
     const permissionDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={savePermission} />
+            <Button type="submit" form="formPermission" label="Salvar" icon="pi pi-check" className="p-button-text" />
         </>
     );
     const deletePermissionDialogFooter = (
@@ -175,11 +193,13 @@ const Permission = () => {
                     </DataTable>
 
                     <Dialog visible={permissionDialog} style={{ width: '450px' }} header="Detalhes da Marca" modal className="p-fluid" footer={permissionDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={permission.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !permission.name })} />
-                            {submitted && !permission.name && <small className="p-invalid">Nome é obrigatório.</small>}
-                        </div>
+                        <form id="formPermission" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="name">Nome</label>
+                                <InputText id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} autoFocus className={classNames({ 'p-invalid': isFormFieldValid('name') })} />
+                                {getFormErrorMessage('name')}
+                            </div>
+                        </form>
                     </Dialog>
 
                     <Dialog visible={permissionDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deletePermissionDialogFooter} onHide={hideDeletePermissionDialog}>

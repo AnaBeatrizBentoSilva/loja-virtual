@@ -8,6 +8,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
+import {useFormik} from 'formik';
 import { CityService } from '../../service/register/CityService';
 import { StateService} from '../../service/register/StateService';
 
@@ -15,7 +16,7 @@ const City = () => {
 
     let cityNew = {
         name: '',
-        state: ''
+        state: null
     };
 
     const [cities, setCities] = useState(null);
@@ -29,6 +30,26 @@ const City = () => {
     const dt = useRef(null);
     const cityService = new CityService();
     const stateService = new StateService();
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: city,
+
+        validate: (data) => {
+            let errors = {};
+        
+            if (!data.name) {
+                errors.name = "Nome é obrigatório.";
+            }
+        
+            return errors;
+        },
+        onSubmit: (data) => {
+            setCity(data);
+            saveCity();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
         stateService.state().then((res) => {
@@ -69,7 +90,7 @@ const City = () => {
         setSubmitted(true);
 
         if(city.name.trim()){
-            let _city = { ...city};
+            let _city = formik.values;
             if(city.id){
                 cityService.alter(_city).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -105,13 +126,11 @@ const City = () => {
         });
     }
 
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _city = { ...city};
-        _city[`${name}`] = val;
-
-        setCity(_city);
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     }
+
 
     const leftToolbarTemplate = () => {
         return(
@@ -172,7 +191,7 @@ const City = () => {
     const cityDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveCity} />
+            <Button type="submit" form="formCity" label="Salvar" icon="pi pi-check" className="p-button-text" />
         </>
     );
     const deleteCityDialogFooter = (
@@ -202,16 +221,18 @@ const City = () => {
                     </DataTable>
 
                     <Dialog visible={cityDialog} style={{ width: '450px' }} header="Detalhes da Cidade" modal className="p-fluid" footer={cityDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={city.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !city.name })} />
-                            {submitted && !city.name && <small className="p-invalid">Nome é obrigatório.</small>}
-                        </div>
+                        <form id="formCity" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="name">Nome</label>
+                                <InputText id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} autoFocus className={classNames({ 'p-invalid': isFormFieldValid('name') })} />
+                                {getFormErrorMessage('name')}
+                            </div>
 
-                        <div className="field">
-                            <label htmlFor="name">Estado</label>
-                            <Dropdown value={city.state} filter onChange={(e) => setCity({ ...city, state: e.value })} options={states} placeholder="Selecione o Estado" />
-                        </div>
+                            <div className="field">
+                                <label htmlFor="name">Estado</label>
+                                <Dropdown id="state" value={formik.values.state} filter onChange={formik.handleChange} options={states} placeholder="Selecione o Estado" />
+                            </div>
+                        </form>
                     </Dialog>
 
                     <Dialog visible={cityDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteCityDialogFooter} onHide={hideDeleteCityDialog}>

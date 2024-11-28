@@ -6,8 +6,9 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { MarkService } from '../../service/register/MarkService';
 import { Toolbar } from 'primereact/toolbar';
+import {useFormik} from 'formik';
+import { MarkService } from '../../service/register/MarkService';
 
 const Mark = () => {
 
@@ -24,6 +25,26 @@ const Mark = () => {
     const toast = useRef(null);
     const dt = useRef(null);
     const markService = new MarkService();
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: mark,
+
+        validate: (data) => {
+            let errors = {};
+        
+            if (!data.name) {
+                errors.name = "Nome é obrigatório.";
+            }
+        
+            return errors;
+        },
+        onSubmit: (data) => {
+            setMark(data);
+            saveMark();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
         if (marks == null){
@@ -52,7 +73,7 @@ const Mark = () => {
         setSubmitted(true);
 
         if(mark.name.trim()){
-            let _mark = { ...mark};
+            let _mark = formik.values;
             if(mark.id){
                 markService.alter(_mark).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -88,12 +109,9 @@ const Mark = () => {
         });
     }
 
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _mark = { ...mark};
-        _mark[`${name}`] = val;
-
-        setMark(_mark);
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     }
 
     const leftToolbarTemplate = () => {
@@ -146,7 +164,7 @@ const Mark = () => {
     const markDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveMark} />
+            <Button type="submit" form="formMark" label="Salvar" icon="pi pi-check" className="p-button-text" />
         </>
     );
     const deleteMarkDialogFooter = (
@@ -175,11 +193,13 @@ const Mark = () => {
                     </DataTable>
 
                     <Dialog visible={markDialog} style={{ width: '450px' }} header="Detalhes da Marca" modal className="p-fluid" footer={markDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="name">Nome</label>
-                            <InputText id="name" value={mark.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !mark.name })} />
-                            {submitted && !mark.name && <small className="p-invalid">Nome é obrigatório.</small>}
-                        </div>
+                        <form id="formMark" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="name">Nome</label>
+                                <InputText id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} autoFocus className={classNames({ 'p-invalid': isFormFieldValid('name') })} />
+                                {getFormErrorMessage('name')}
+                            </div>
+                        </form>
                     </Dialog>
 
                     <Dialog visible={markDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteMarkDialogFooter} onHide={hideDeleteMarkDialog}>
