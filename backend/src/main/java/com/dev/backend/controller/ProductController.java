@@ -25,25 +25,25 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public List<Product> searchAll(){
         return productService.searchAll();
     }
 
     @PostMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Product insert(@RequestBody Product product){
         return productService.insert(product);
     }
 
     @PutMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Product alter(@RequestBody Product product){
         return productService.alter(product);
     }
 
     @DeleteMapping("/{id}")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         productService.delete(id);
         return ResponseEntity.ok().build();

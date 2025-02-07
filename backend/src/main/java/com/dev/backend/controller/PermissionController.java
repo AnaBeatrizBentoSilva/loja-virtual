@@ -25,25 +25,25 @@ public class PermissionController {
     private PermissionService permissionService;
 
     @GetMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public List<Permission> searchAll(){
         return permissionService.searchAll();
     }
 
     @PostMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Permission insert(@RequestBody Permission permission){
         return permissionService.insert(permission);
     }
 
     @PutMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Permission alter(@RequestBody Permission permission){
         return permissionService.alter(permission);
     }
 
     @DeleteMapping("/{id}")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         permissionService.delete(id);
         return ResponseEntity.ok().build();

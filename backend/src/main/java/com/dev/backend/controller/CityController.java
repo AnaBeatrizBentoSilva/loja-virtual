@@ -25,25 +25,25 @@ public class CityController {
     private CityService cityService;
 
     @GetMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public List<City> searchAll(){
         return cityService.searchAll();
     }
 
     @PostMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public City insert(@RequestBody City city){
         return cityService.insert(city);
     }
 
     @PutMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public City alter(@RequestBody City city){
         return cityService.alter(city);
     }
 
     @DeleteMapping("/{id}")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         cityService.delete(id);
         return ResponseEntity.ok().build();

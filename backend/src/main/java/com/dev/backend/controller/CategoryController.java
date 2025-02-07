@@ -25,25 +25,25 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public List<Category> searchAll(){
         return categoryService.searchAll();
     }
 
     @PostMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Category insert(@RequestBody Category category){
         return categoryService.insert(category);
     }
 
     @PutMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Category alter(@RequestBody Category category){
         return categoryService.alter(category);
     }
 
     @DeleteMapping("/{id}")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         categoryService.delete(id);
         return ResponseEntity.ok().build();
