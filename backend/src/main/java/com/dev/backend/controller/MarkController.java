@@ -25,25 +25,25 @@ public class MarkController {
     private MarkService markService;
 
     @GetMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public List<Mark> searchAll(){
         return markService.searchAll();
     }
 
     @PostMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Mark insert(@RequestBody Mark mark){
         return markService.insert(mark);
     }
 
     @PutMapping("/")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public Mark alter(@RequestBody Mark mark){
         return markService.alter(mark);
     }
 
     @DeleteMapping("/{id}")
-    @CrossOrigin("http://localhost:3000")
+    @CrossOrigin("http://localhost:3001")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){
         markService.delete(id);
         return ResponseEntity.ok().build();
