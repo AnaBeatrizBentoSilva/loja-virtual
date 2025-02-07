@@ -9,9 +9,11 @@ import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
 import { InputMask } from 'primereact/inputmask';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
+import { MultiSelect} from 'primereact/multiselect';
 import { PersonService } from '../../service/register/PersonService';
 import { CityService } from '../../service/register/CityService';
+import { PermissionService} from '../../service/register/PermissionService';
 
 const Person = () => {
 
@@ -21,11 +23,13 @@ const Person = () => {
         email: '',
         cep: '',
         address: '',
-        city: null
+        city: null,
+        permissionPerson: []
     };
 
     const [people, setPeople] = useState(null);
     const [cities, setCities] = useState(null);
+    const [permissions, setPermissions] = useState(null);
     const [personDialog, setPersonDialog] = useState(false);
     const [personDeleteDialog, setPersonDeleteDialog] = useState(false);
     const [person, setPerson] = useState(personNew);
@@ -35,6 +39,7 @@ const Person = () => {
     const dt = useRef(null);
     const personService = new PersonService();
     const cityService = new CityService();
+    const permissionService = new PermissionService();
 
     const formik = useFormik({
         enableReinitialize: true,
@@ -63,7 +68,7 @@ const Person = () => {
         },
         onSubmit: (data) => {
             setPerson(data);
-            savePerson();
+            savePerson(data);
             formik.resetForm();
         }
     });
@@ -106,12 +111,27 @@ const Person = () => {
     }, [cityService]);
 
     useEffect(() => {
+        permissionService.permission().then((res) => {
+            let permissionsTemporary = [];
+            res.data.forEach(element => {
+                permissionsTemporary.push({permission: element});
+            });
+            setPermissions(permissionsTemporary);
+        });
+    }, [permissionService]);
+    
+    useEffect(() => {
         if (people == null) {
             personService.person().then(res => {
-                setPeople(res.data);
+                const formattedPeople = res.data.map(person => ({
+                    ...person,
+                    permissionPerson: person.permissionPersons.map(permissionPerson => permissionPerson.permission)
+                }));
+                setPeople(formattedPeople);
             });
         }
     }, [people, personService]);
+    
 
     const openNew = () => {
         setPerson(personNew);
@@ -133,6 +153,8 @@ const Person = () => {
 
         if(person.name.trim()){
             let _person = formik.values;
+            console.log('Person data being saved:', _person);
+
             if(person.id){
                 personService.alter(_person).then(data => {
                     toast.current.show({severity: 'sucess', summary: 'Successful', detail: 'Product Updated', life: 3000 })
@@ -245,6 +267,20 @@ const Person = () => {
         );
     }
 
+    const permissionPersonBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className='p-column-title'>Permissões</span>
+                {rowData.permissionPerson && rowData.permissionPerson.length > 0
+                    ? rowData.permissionPerson.map((permission, index) => (
+                        <span key={index}>{permission.name}</span>
+                    ))
+                    : 'Nenhuma permissão'}
+            </>
+        );
+    }
+    
+
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
@@ -298,6 +334,7 @@ const Person = () => {
                         <Column field="cep" header="CEP" sortable body={cepBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="address" header="Endereço" sortable body={addressBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="city" header="Cidade" sortable body={cityBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="permissionPerson" header="Permissões" sortable body={permissionPersonBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column body={actionBodyTemplate}></Column>
                     </DataTable>
     
@@ -334,6 +371,11 @@ const Person = () => {
                             <div className="field">
                                 <label htmlFor="city">Cidade</label>
                                 <Dropdown id="city" value={formik.values.city} filter onChange={formik.handleChange} options={cities} placeholder="Selecione a Cidade" />
+                            </div>
+
+                            <div className="field">
+                                <label htmlFor="permissionPerson">Permissões</label>
+                                <MultiSelect dataKey="permission.id" id="permissionPerson" onHide={() => document.body.click()} value={formik.values.permissionPerson} filter onChange={formik.handleChange} options={permissions} optionLabel="permission.name" placeholder="Selecione as Permissões" />
                             </div>
                         </form>
                     </Dialog>
